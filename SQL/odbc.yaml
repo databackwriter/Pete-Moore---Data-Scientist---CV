@@ -1,0 +1,5 @@
+---
+DSN: "MYMSSQL_SMARTCV"
+user: "youruser"
+password: "yourpassword"
+---

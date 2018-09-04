@@ -1,0 +1,27 @@
+#yaml of overivew contact info
+#idea inspired by https: //www.jaredlander.com/2017/06/writing-resumes-in-r/
+#combined with the HR-XML standards:  https: //schemas.liquid-technologies.com/HR-XML/3.1/?page=fields_xsd.html 
+# inspired by XSD Schema Code:  https: //schemas.liquid-technologies.com/HR-XML/3.1/?page=fields_xsd.html
+PersonNameBaseType: 
+  FormattedName: "Peter Moore"
+  GivenName: "Pete"
+  PreferredName: "Pete"
+  MiddleName: "Frederick"
+  FamilyName: "Moore"
+
+# inspired by Example Code:  http: //hr-xsl.sourceforge.net/doc/ch06.html#ContactInfo
+ContactInfo: 
+  Telephone: "07810 698 243"
+  InternetEmailAddress: "pete@lookatyourdata.ai"
+  InternetWebAddress: "lookatyourdata.ai"
+  # Pete Moore:  added bespoke fields here to cover social media
+  GitHubAddress: "https: //github.com/databackwriter"
+  BlogAddress: "https: //databackwriter.com"
+  TwitterAddress: "https: //twitter.com/thedatabloke"
+  LinkedInAddress: "https: //www.linkedin.com/in/lookatmydata/"
+  StackOverFLowAddress: "https: //stackexchange.com/users/12936623/pete-moore"
+  PowerBIDataViz: "https: //app.powerbi.com/view?r=eyJrIjoiZmI3MzY1NTEtMGFlYS00OWYzLThlMzUtZmU1ZjkzZGI0YjBlIiwidCI6IjdhZDRlMDg1LWE3ZWMtNDZlOC1hODIwLWI5MjM1NDRmMGVhOCJ9"
+  
+Bespoke:  #added by PM for the specific project of writing a CV
+  JobCutOffYear: "2002"#show experience going back to...
+  EducationCutOffYear: "1993"#show education going back to...

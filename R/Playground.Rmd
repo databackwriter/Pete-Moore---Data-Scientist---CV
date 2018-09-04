@@ -1,0 +1,154 @@
+---
+title: "Curriculum Vitae"
+author: "Pete Moore"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r r-keep-tidy, include = FALSE}
+options(warn=-1)
+rm(list=ls()) #clear variables
+cat("\014")  #clear console
+```
+
+```{r r-setup-part-1, include=FALSE} 
+# we are going to use R, sql and python and we are going to set them up now.
+
+# use the tufte library for visual output
+require(tufte)
+
+# use the reticulate library to speak to python
+library(reticulate)
+
+# and immediately deploy reticulate to utilise conda
+use_condaenv(condaenv="PyR", required =TRUE)
+
+```
+
+```{python py-setup, include=FALSE}
+# Internal variables setup (NB set up variables in python so can be passed to R)
+editid = 0 #an id for this edit of the cv; set to zero to build new editiion of CV
+cvtypeid = 1 #1	Data Scientist; 2	IT Director; 3	SQL Server Expert; 4	Non-executive Director
+# we want to utilise the included to build a model for thisCV 
+PATH_FILE="/Users/petermoore/Documents/GitHub/Pete Moore - Data Scientist - CV/Python"
+import os
+os.chdir(PATH_FILE)
+import sys
+sys.path.append(PATH_FILE) #add local directory to path
+
+# get constants from bespke pytong scpript
+from constants import DSN, ALCHEMYDSN, pdsn, puser, ppassword
+
+if editid == 0:
+  import BuildSQLDataModel
+  editid = BuildSQLDataModel.buildEdit(cvtypeid)
+  print("most recent editid is: " + str(editid)) #<-- note to self, you are still in python so paste won't work!
+
+
+```
+
+```{r r-setup-part-2, include=FALSE} 
+# "reclaim" vairables from python
+editid <-py$editid
+
+# use the DBI and odbc packages to connet to sql from R
+#(NB the exact connections.yaml file is not included, for obvious password-related reasons, but I've provided a mock-up in the ODBC folder which you could adapt)
+library(DBI) # for SQL database calls
+library(odbc) # for R database calls
+
+# get connection variables 
+con <- DBI::dbConnect(odbc::odbc(),
+                      DSN = py$pdsn,
+                      uid = py$puser,
+                      pwd = py$ppassword)
+
+# collate these in knitr with all the other chunk options
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'), connection = "con", max.print = NA, fig.cap = TRUE) 
+knitr::knit_engines$set(python = reticulate::eng_python)
+
+# set up html
+options(htmltools.dir.version = FALSE)
+
+
+```
+
+```{r r-markdown-formatting, include=FALSE}
+
+  #cat("  \n###",  i, "  \n") 
+  #cat("summat")
+  #cat("  \n")
+formatfromDB<-function(header, headerlevel, body){
+  indent <- paste0("  \n", paste(rep("#", headerlevel),collapse=""))
+  cat(indent,  header, "  \n") 
+  cat(body)
+  cat("  \n")
+}
+
+getdetailfromCV<-function(f.editid, f.sectionid, f.roletypeid=3){
+  f.sql <- "dbo.usp_PM_Section_Show ?, ?, ?"
+  f.params <- list(f.editid, f.sectionid, f.roletypeid)
+  f.query <- dbSendQuery(con, f.sql)
+  dbBind(f.query, f.params)
+  f.list <- dbFetch(f.query)
+  f.df <- data.frame(f.list)
+
+  
+  return(f.df)
+}
+
+
+
+
+```
+
+```{r r-sections, eval=TRUE, echo=FALSE,results="asis"}
+section.sql <- "dbo.usp_PM_Section_GetSections"
+section.query <- dbSendQuery(con, section.sql)
+section.list <- dbFetch(section.query)
+section.df <- data.frame(section.list)
+for (row in 1:nrow(section.df)){
+  section.id <- section.df[row,"sectionid"]
+  section.name <- section.df[row,"section"]
+  
+  formatfromDB(section.name, 1, "")
+  f.df <- getdetailfromCV(editid, section.id)
+  for (row in 1:nrow(f.df)){
+    f.textforshow <- f.df[row,"textforshow"]
+    f.groupind <- f.df[row,"groupind"]
+    f.component <- f.df[row,"component"]
+    f.cvtextid <- f.df[row,"cvtextid"]
+    
+    f.headerlevel <- f.df[row,"headerlevel"]
+    f.prefix <- f.df[row,"prefix"]
+    f.suffix <- f.df[row,"suffix"]
+    f.indent <- f.df[row,"indent"]
+    
+    if (f.headerlevel >0){
+      if (f.textforshow!=section.name){
+        formatfromDB(f.textforshow, f.headerlevel, "")
+      }
+    }else{
+      f.textforshow <- paste0(f.prefix, f.textforshow, f.suffix)
+      formatfromDB("", f.headerlevel, f.textforshow)
+    }
+    
+
+
+  }
+}
+```
+
+## CV edition information (internal use only)
+```{r r-edition information, eval=TRUE, echo=FALSE} 
+
+s<- "dbo.usp_PM_Candidate_GetFormattedName ?"
+s.formattedname <- dbSendQuery(con, s)
+dbBind(s.formattedname, editid)
+s.out <- dbFetch(s.formattedname)$formattedname
+
+t<- "dbo.usp_PM_CVType_GetCVType ?"
+t.cvtype <- dbSendQuery(con, t)
+dbBind(t.cvtype, editid)
+t.out <- dbFetch(t.cvtype)$cvtype
+```
+`r t.out` CV issue `r py$editid`(`r editid`) for `r s.out`

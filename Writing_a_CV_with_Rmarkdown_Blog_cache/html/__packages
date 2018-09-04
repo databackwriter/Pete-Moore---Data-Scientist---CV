@@ -1,0 +1,6 @@
+base
+tufte
+reticulate
+DBI
+odbc
+ggplot2
