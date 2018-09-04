@@ -6,14 +6,15 @@ output: pdf_document
 ---
 
 # Contact details
-Telephone: 07810698243
-Email: mailto:pete@lookatyourdata.ai
-GitHub: https://github.com/databackwriter
-Blog: https://databackwriter.com
-Twitter: https://twitter.com/thedatabloke
-LinkedIn: https: //www.linkedin.com/in/lookatmydata/
-StackOverflow: https://stackexchange.com/users/12936623/pete-moore
-PowerBI Data Viz of this CV : http://bit.ly/PeteMooreDataViz
+
+* Telephone: 07810698243
+* Email: mailto:pete@lookatyourdata.ai
+* GitHub^[for the R markdown that created this CV see: https://github.com/databackwriter/Pete-Moore---Data-Scientist---CV]: https://github.com/databackwriter
+* Blog: https://databackwriter.com
+* Twitter: https://twitter.com/thedatabloke
+* LinkedIn: https://www.linkedin.com/in/lookatmydata/
+* StackOverflow: https://stackexchange.com/users/12936623/pete-moore
+* PowerBI Data Viz of this CV : http://bit.ly/PeteMooreDataViz
   
 
 ```{r r-keep-tidy, include = FALSE}
@@ -38,7 +39,7 @@ use_condaenv(condaenv="PyR", required =TRUE)
 
 ```{python py-setup, include=FALSE}
 # Internal variables setup (NB set up variables in python so can be passed to R)
-editid = 0 #an id for this edit of the cv; set to zero to build new editiion of CV
+editid = 0 #an id for this edit of the cv; set to zero to build new edition of CV
 cvtypeid = 1 #1	Data Scientist; 2	IT Director; 3	SQL Server Expert; 4	Non-executive Director
 # we want to utilise the included to build a model for thisCV 
 PATH_FILE="/Users/petermoore/Documents/GitHub/Pete Moore - Data Scientist - CV/Python"
