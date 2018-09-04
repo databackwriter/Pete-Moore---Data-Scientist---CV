@@ -5,6 +5,17 @@ date: "`r Sys.Date()`"
 output: pdf_document
 ---
 
+# Contact details
+Telephone: 07810698243
+Email: mailto:pete@lookatyourdata.ai
+GitHub: https://github.com/databackwriter
+Blog: https://databackwriter.com
+Twitter: https://twitter.com/thedatabloke
+LinkedIn: https: //www.linkedin.com/in/lookatmydata/
+StackOverflow: https://stackexchange.com/users/12936623/pete-moore
+PowerBI Data Viz of this CV : http://bit.ly/PeteMooreDataViz
+  
+
 ```{r r-keep-tidy, include = FALSE}
 options(warn=-1)
 rm(list=ls()) #clear variables

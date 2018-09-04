@@ -5,4 +5,5 @@ AS
 SELECT s.sectionid
      , s.section
 FROM dbo.Section AS s
+WHERE s.sectionid >1
 ORDER BY s.sectionid;

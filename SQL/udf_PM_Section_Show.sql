@@ -68,11 +68,20 @@ CREATE PROCEDURE dbo.usp_PM_Section_Show
   , @roletypeid INT = 1
 AS
 BEGIN
-    SELECT u.textforshow
+    SELECT u.formattedname
+         , u.cvtype
+         , u.editname
+         , u.section
+         , u.roletypeid
+         , u.textforshow
          , u.groupind
          , u.component
          , u.cvtextid
          , u.orderind
+         , u.headerlevel
+         , u.prefix
+         , u.suffix
+         , u.indent
     FROM dbo.udf_PM_Section_Show(@editid, @sectionid, @roletypeid) u
     ORDER BY u.orderind;
 
@@ -81,5 +90,5 @@ END;
 
 GO
 
-EXEC dbo.usp_PM_Section_Show 2, 1, 3;
+EXEC dbo.usp_PM_Section_Show 1, 3, 3;
 
