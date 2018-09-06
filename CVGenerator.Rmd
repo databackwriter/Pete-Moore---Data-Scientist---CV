@@ -2,19 +2,16 @@
 title: "Curriculum Vitae"
 author: "Pete Moore"
 date: "`r Sys.Date()`"
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[CO,CE]{Tel:07810698243 mailto:pete@lookatyourdata.ai}
+# - \fancyfoot[CO,CE]{Power BI Data Viz of this CV: http://bit.ly/PeteMooreDataViz}
+# - \fancyfoot[LE,RO]{\thepage}
 output: pdf_document
 ---
 
-# Contact details
-
-* Telephone: 07810698243
-* Email: mailto:pete@lookatyourdata.ai
-* GitHub^[for the R markdown that created this CV see: https://github.com/databackwriter/Pete-Moore---Data-Scientist---CV]: https://github.com/databackwriter
-* Blog: https://databackwriter.com
-* Twitter: https://twitter.com/thedatabloke
-* LinkedIn: https://www.linkedin.com/in/lookatmydata/
-* StackOverflow: https://stackexchange.com/users/12936623/pete-moore
-* PowerBI Data Viz of this CV : http://bit.ly/PeteMooreDataViz
+Power BI Data Viz of this CV: http://bit.ly/PeteMooreDataViz 
   
 
 ```{r r-keep-tidy, include = FALSE}
@@ -125,30 +122,51 @@ for (row in 1:nrow(section.df)){
   formatfromDB(section.name, 1, "")
   f.df <- getdetailfromCV(editid, section.id)
   for (row in 1:nrow(f.df)){
-    f.textforshow <- f.df[row,"textforshow"]
-    f.groupind <- f.df[row,"groupind"]
-    f.component <- f.df[row,"component"]
-    f.cvtextid <- f.df[row,"cvtextid"]
-    
-    f.headerlevel <- f.df[row,"headerlevel"]
-    f.prefix <- f.df[row,"prefix"]
-    f.suffix <- f.df[row,"suffix"]
-    f.indent <- f.df[row,"indent"]
-    
-    if (f.headerlevel >0){
-      if (f.textforshow!=section.name){
-        formatfromDB(f.textforshow, f.headerlevel, "")
+    if (section.id != 1){
+      section.astable <- c("Education", "Summer work")
+      if (!section.name %in% section.astable){
+        f.textforshow <- f.df[row,"textforshow"]
+        f.groupind <- f.df[row,"groupind"]
+        f.component <- f.df[row,"component"]
+        f.cvtextid <- f.df[row,"cvtextid"]
+        
+        f.headerlevel <- f.df[row,"headerlevel"]
+        f.prefix <- f.df[row,"prefix"]
+        f.suffix <- f.df[row,"suffix"]
+        f.indent <- f.df[row,"indent"]
+        
+        if (f.headerlevel >0){
+          if (f.textforshow!=section.name){
+            formatfromDB(f.textforshow, f.headerlevel, "")
+          }
+        }else{
+          f.textforshow <- paste0(f.prefix, f.textforshow, f.suffix)
+          formatfromDB("", f.headerlevel, f.textforshow)
+        }
       }
-    }else{
-      f.textforshow <- paste0(f.prefix, f.textforshow, f.suffix)
-      formatfromDB("", f.headerlevel, f.textforshow)
     }
-    
 
 
   }
 }
 ```
+<!-- ## Education and summer work -->
+```{r, echo=FALSE, eval=TRUE}
+# opportunity.sql <- "dbo.usp_PM_opportunity_Getopportunitys"
+# opportunity.query <- dbSendQuery(con, opportunity.sql)
+# opportunity.list <- dbFetch(opportunity.query)
+# opportunity.df <- data.frame(opportunity.list)
+
+```
+
+## Further contact details
+
+* GitHub^[for the R markdown that created this CV see: https://github.com/databackwriter/Pete-Moore---Data-Scientist---CV]: https://github.com/databackwriter
+* Blog: https://databackwriter.com
+* Twitter: https://twitter.com/thedatabloke
+* LinkedIn: https://www.linkedin.com/in/lookatmydata/
+* StackOverflow: https://stackexchange.com/users/12936623/pete-moore
+
 
 ## CV edition information (internal use only)
 ```{r r-edition information, eval=TRUE, echo=FALSE} 

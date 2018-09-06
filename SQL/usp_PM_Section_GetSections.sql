@@ -5,5 +5,5 @@ AS
 SELECT s.sectionid
      , s.section
 FROM dbo.Section AS s
-WHERE s.sectionid >1
+WHERE s.sectionid BETWEEN 2 AND 6
 ORDER BY s.sectionid;
