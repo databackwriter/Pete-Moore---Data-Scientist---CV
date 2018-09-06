@@ -1,0 +1,86 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[usp_PM_Section_Show]
+    @editid INT
+  , @sectionid INT
+  , @roletypeid INT = 1
+  , @showastable BIT = 0
+AS
+BEGIN
+    IF @showastable = 0
+        SELECT u.formattedname
+             , u.cvtype
+             , u.editname
+             , u.section
+             , u.roletypeid
+             , u.textforshow
+             , u.groupind
+             , u.component
+             , u.cvtextid
+             , u.orderind
+             , u.headerlevel
+             , u.prefix
+             , u.suffix
+             , u.indent
+             , u.opportunityid
+             , u.opportunityname
+             , u.company
+             , u.city
+             , u.state
+             , u.county
+             , u.startmonth
+             , u.startyear
+             , u.startdate
+             , u.endmonth
+             , u.endyear
+             , u.enddate
+        FROM dbo.udf_PM_Section_Show(@editid, @sectionid, @roletypeid) u
+        ORDER BY u.orderind;
+    ELSE
+        SELECT u.opportunityid
+             , u.opportunityname
+             , u.company
+             , u.city
+             , u.state
+             , u.county
+             , u.startmonth
+             , u.startyear
+             , u.startdate
+             , u.endmonth
+             , u.endyear
+             , u.enddate
+             , u.startmonth + '-' + CAST(u.startyear AS VARCHAR(4)) AS startpoint
+             , u.endmonth + '-' + CAST(u.endyear AS VARCHAR(4)) AS endingpoint
+        FROM dbo.udf_PM_Section_Show(@editid, @sectionid, @roletypeid) u
+        WHERE u.opportunityid IS NOT NULL
+        GROUP BY u.opportunityid
+               , u.opportunityname
+               , u.company
+               , u.city
+               , u.state
+               , u.county
+               , u.startmonth
+               , u.startyear
+               , u.startdate
+               , u.endmonth
+               , u.endyear
+               , u.enddate
+               ;
+
+
+END;
+
+
+GO
+
+
+
+EXEC [dbo].[usp_PM_Section_Show]
+    @editid = 1
+  , @sectionid = 9
+  , @roletypeid  = 1
+  , @showastable  = 1
+
+

@@ -1,18 +1,15 @@
 ---
-title: "Curriculum Vitae"
-author: "Pete Moore"
-date: "`r Sys.Date()`"
+title: "Curriculum Vitae - Pete Moore"
+# author: "Pete Moore"
+# date: "`r Sys.Date()`"
 header-includes:
 - \usepackage{fancyhdr}
 - \pagestyle{fancy}
-- \fancyhead[CO,CE]{Tel:07810698243 mailto:pete@lookatyourdata.ai}
-# - \fancyfoot[CO,CE]{Power BI Data Viz of this CV: http://bit.ly/PeteMooreDataViz}
-# - \fancyfoot[LE,RO]{\thepage}
-output: pdf_document
+- \fancyhead[CO,CE]{Tel:07810698243 e:pete@lookatyourdata.ai}
+- \fancyfoot[CO,CE]{`r Sys.Date()`}
+- \fancyfoot[LE,RO]{\thepage}
+output: word_document
 ---
-
-Power BI Data Viz of this CV: http://bit.ly/PeteMooreDataViz 
-  
 
 ```{r r-keep-tidy, include = FALSE}
 options(warn=-1)
@@ -28,6 +25,9 @@ require(tufte)
 
 # use the reticulate library to speak to python
 library(reticulate)
+
+# use dplyr for data transformations
+library(dplyr)
 
 # and immediately deploy reticulate to utilise conda
 use_condaenv(condaenv="PyR", required =TRUE)
@@ -86,16 +86,16 @@ options(htmltools.dir.version = FALSE)
   #cat("  \n###",  i, "  \n") 
   #cat("summat")
   #cat("  \n")
-formatfromDB<-function(header, headerlevel, body){
+tex.formatfromDB<-function(header, headerlevel, body){
   indent <- paste0("  \n", paste(rep("#", headerlevel),collapse=""))
   cat(indent,  header, "  \n") 
   cat(body)
   cat("  \n")
 }
 
-getdetailfromCV<-function(f.editid, f.sectionid, f.roletypeid=3){
-  f.sql <- "dbo.usp_PM_Section_Show ?, ?, ?"
-  f.params <- list(f.editid, f.sectionid, f.roletypeid)
+getdetailfromCV<-function(f.editid, f.sectionid, f.roletypeid=3, f.showastable =0){
+  f.sql <- "dbo.usp_PM_Section_Show ?, ?, ?, ?"
+  f.params <- list(f.editid, f.sectionid, f.roletypeid, f.showastable)
   f.query <- dbSendQuery(con, f.sql)
   dbBind(f.query, f.params)
   f.list <- dbFetch(f.query)
@@ -115,51 +115,50 @@ section.sql <- "dbo.usp_PM_Section_GetSections"
 section.query <- dbSendQuery(con, section.sql)
 section.list <- dbFetch(section.query)
 section.df <- data.frame(section.list)
+section.astable <- c("Volunteering", "Education", "Summer work")
+section.omit <- c("Title")
+section.ignore <- union(section.astable, section.omit)
 for (row in 1:nrow(section.df)){
   section.id <- section.df[row,"sectionid"]
   section.name <- section.df[row,"section"]
+  f.df <- getdetailfromCV(f.edit=editid, f.sectionid=section.id)
+  if (!section.name %in% section.ignore){
+    tex.formatfromDB(section.name, 1, "")
+    for (row in 1:nrow(f.df)){
   
-  formatfromDB(section.name, 1, "")
-  f.df <- getdetailfromCV(editid, section.id)
-  for (row in 1:nrow(f.df)){
-    if (section.id != 1){
-      section.astable <- c("Education", "Summer work")
-      if (!section.name %in% section.astable){
-        f.textforshow <- f.df[row,"textforshow"]
-        f.groupind <- f.df[row,"groupind"]
-        f.component <- f.df[row,"component"]
-        f.cvtextid <- f.df[row,"cvtextid"]
-        
-        f.headerlevel <- f.df[row,"headerlevel"]
-        f.prefix <- f.df[row,"prefix"]
-        f.suffix <- f.df[row,"suffix"]
-        f.indent <- f.df[row,"indent"]
-        
-        if (f.headerlevel >0){
-          if (f.textforshow!=section.name){
-            formatfromDB(f.textforshow, f.headerlevel, "")
-          }
-        }else{
-          f.textforshow <- paste0(f.prefix, f.textforshow, f.suffix)
-          formatfromDB("", f.headerlevel, f.textforshow)
+      f.textforshow <- f.df[row,"textforshow"]
+      f.groupind <- f.df[row,"groupind"]
+      f.component <- f.df[row,"component"]
+      f.cvtextid <- f.df[row,"cvtextid"]
+      
+      f.headerlevel <- f.df[row,"headerlevel"]
+      f.prefix <- f.df[row,"prefix"]
+      f.suffix <- f.df[row,"suffix"]
+      f.indent <- f.df[row,"indent"]
+      
+      if (f.headerlevel >0){
+        if (f.textforshow!=section.name){
+          tex.formatfromDB(f.textforshow, f.headerlevel, "")
         }
+      }else{
+        f.textforshow <- paste0(f.prefix, f.textforshow, f.suffix)
+        tex.formatfromDB("", f.headerlevel, f.textforshow)
       }
     }
-
-
+  }else{
+    if(section.name %in% section.astable){
+      tex.formatfromDB(section.name, 1, "")
+      o.df <- getdetailfromCV(f.edit=editid, f.sectionid=section.id, f.showastable=1)
+      o.df <- select(o.df, opportunityname, company, state, startpoint, endingpoint)
+      o.df <- rename(o.df, Position=opportunityname, Institution=company, Place=state, From=startpoint, To=endingpoint)
+      print(knitr::kable(o.df, caption = paste(section.name,' details')))#select(iris, "Sepal.Length", "Sepal.Width")
+      cat("\n")
+    }
   }
 }
 ```
-<!-- ## Education and summer work -->
-```{r, echo=FALSE, eval=TRUE}
-# opportunity.sql <- "dbo.usp_PM_opportunity_Getopportunitys"
-# opportunity.query <- dbSendQuery(con, opportunity.sql)
-# opportunity.list <- dbFetch(opportunity.query)
-# opportunity.df <- data.frame(opportunity.list)
 
-```
-
-## Further contact details
+## Community profile
 
 * GitHub^[for the R markdown that created this CV see: https://github.com/databackwriter/Pete-Moore---Data-Scientist---CV]: https://github.com/databackwriter
 * Blog: https://databackwriter.com
