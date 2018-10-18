@@ -1,0 +1,12 @@
+base
+tufte
+reticulate
+dplyr
+lubridate
+tidyr
+scales
+ggthemes
+ggplot2
+DBI
+odbc
+bindrcpp

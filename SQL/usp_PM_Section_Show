@@ -7,6 +7,7 @@ ALTER PROCEDURE [dbo].[usp_PM_Section_Show]
   , @sectionid INT
   , @roletypeid INT = 1
   , @showastable BIT = 0
+  , @showall BIT = 0
 AS
 BEGIN
     IF @showastable = 0
@@ -36,7 +37,7 @@ BEGIN
              , u.endmonth
              , u.endyear
              , u.enddate
-        FROM dbo.udf_PM_Section_Show(@editid, @sectionid, @roletypeid) u
+        FROM dbo.udf_PM_Section_Show(@editid, @sectionid, @roletypeid, @showall) u
         ORDER BY u.orderind;
     ELSE
         SELECT u.opportunityid
@@ -77,10 +78,6 @@ GO
 
 
 
-EXEC [dbo].[usp_PM_Section_Show]
-    @editid = 1
-  , @sectionid = 9
-  , @roletypeid  = 1
-  , @showastable  = 1
+
 
 

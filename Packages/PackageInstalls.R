@@ -27,3 +27,9 @@ pkgTest("tufte")
 pkgTest("mpiccirilli/Rlinkedin", UseGitHubInstead = TRUE)
 
 #ancillary packages: MacTex, installed by hand
+
+# tufte theme for viz
+pkgTest("ggthemes")
+
+# direct labels for viz
+pkgTest("directlabels")

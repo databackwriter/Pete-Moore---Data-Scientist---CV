@@ -1,14 +1,14 @@
 ---
-title: "Curriculum Vitae - Pete Moore"
+title: "Pete Moore"
 # author: "Pete Moore"
 # date: "`r Sys.Date()`"
 header-includes:
 - \usepackage{fancyhdr}
 - \pagestyle{fancy}
-- \fancyhead[CO,CE]{Tel:07810698243 e:pete@lookatyourdata.ai}
+- \fancyhead[CO,CE]{07810698243|pete@lookatyourdata.ai}
 - \fancyfoot[CO,CE]{`r Sys.Date()`}
 - \fancyfoot[LE,RO]{\thepage}
-output: word_document
+output: pdf_document
 ---
 
 ```{r r-keep-tidy, include = FALSE}
@@ -37,7 +37,7 @@ use_condaenv(condaenv="PyR", required =TRUE)
 ```{python py-setup, include=FALSE}
 # Internal variables setup (NB set up variables in python so can be passed to R)
 editid = 0 #an id for this edit of the cv; set to zero to build new edition of CV
-cvtypeid = 1 #1	Data Scientist; 2	IT Director; 3	SQL Server Expert; 4	Non-executive Director
+cvtypeid = 2 #1	Data Scientist; 2	IT Director; 3	SQL Server Expert; 4	Non-executive Director
 # we want to utilise the included to build a model for thisCV 
 PATH_FILE="/Users/petermoore/Documents/GitHub/Pete Moore - Data Scientist - CV/Python"
 import os
@@ -45,8 +45,9 @@ os.chdir(PATH_FILE)
 import sys
 sys.path.append(PATH_FILE) #add local directory to path
 
-# get constants from bespke pytong scpript
+# get constants from bespoke python scpript
 from constants import DSN, ALCHEMYDSN, pdsn, puser, ppassword
+
 
 if editid == 0:
   import BuildSQLDataModel
@@ -72,7 +73,11 @@ con <- DBI::dbConnect(odbc::odbc(),
                       pwd = py$ppassword)
 
 # collate these in knitr with all the other chunk options
-knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'), connection = "con", max.print = NA, fig.cap = TRUE) 
+knitr::opts_chunk$set(tidy = FALSE, 
+                      cache.extra = packageVersion('tufte'), 
+                      connection = "con", 
+                      max.print = NA, 
+                      fig.pos = 'H') 
 knitr::knit_engines$set(python = reticulate::eng_python)
 
 # set up html
@@ -81,7 +86,7 @@ options(htmltools.dir.version = FALSE)
 
 ```
 
-```{r r-markdown-formatting, include=FALSE}
+```{r r-function-kit, include=FALSE}
 
   #cat("  \n###",  i, "  \n") 
   #cat("summat")
@@ -105,12 +110,73 @@ getdetailfromCV<-function(f.editid, f.sectionid, f.roletypeid=3, f.showastable =
   return(f.df)
 }
 
+getOpportunityDfForPlot <- function(opportunity.df){
+  opportunity.df.table <- select(opportunity.df, opportunityname, company, state, startpoint, endingpoint)
+  opportunity.df.table <- rename(opportunity.df.table, Position=opportunityname, Institution=company, Place=state, From=startpoint, To=endingpoint)
+  # gantt chart methodology inspired by https://stats.andrewheiss.com/misc/gantt.html
+  # for visualisations
+  library(lubridate)
+  library(tidyr)
+  library(scales)
+  opportunity.df.vis <- select(opportunity.df, startdate, enddate, company, opportunityname)
+  opportunity.df.vis <- rename(opportunity.df.vis, Start=startdate, End=enddate, Project=company, Task=opportunityname)
+  opportunity.df.vis <-mutate(opportunity.df.vis,
+          End = ifelse(End > now(), format(now()+years(5), "%Y-%m-%d"), format(End, "%Y-%m-%d"))
+   )
+  opportunity.tasks.tibble <- as_tibble(opportunity.df.vis) %>%
+    mutate(Start = ymd(Start),
+           End = ymd(End)) %>%
+    gather(date.type, task.date, -c(Project, Task)) %>%
+    arrange(date.type, task.date) %>%
+    mutate(Task = factor(Task, levels=rev(unique(Task)), ordered=TRUE))
+  return(opportunity.tasks.tibble)
+}
+
+getDateBreaks <- function(opportunity.df){
+  library(lubridate)
+  years.scale <- max(year(opportunity.df$enddate))-min(year(opportunity.df$enddate)) + 1
+  years.breaks <- "2 years"
+  if (years.scale >= 10){
+    years.breaks <- "5 years"
+  }else if (years.scale >= 6){
+    years.breaks <- "2 years"
+  }else {
+    years.breaks <- "1 year"
+  }
+
+  return(years.breaks)
+}
+
+getOpportunityPlot <- function(o.tib, date.breaks="5 years", line.size=3){
+  # theme_tufte borrowed from ggthemes library as per: https://rdrr.io/cran/ggthemes/man/theme_tufte.html
+  library(ggthemes)
+  library(ggplot2)
+  library(directlabels)
+  p <- ggplot(o.tib, aes(x=Task, y=task.date)) + #, colour=Project
+  geom_line(size=line.size) + #size of line and the levgend
+  # geom_vline(xintercept=x.breaks, colour="grey80", linetype="dotted") + 
+  # guides(colour=guide_legend(title=NULL)) +
+  labs(x=NULL, y=NULL) + 
+  scale_colour_discrete(guide = 'none')  +  # added by PM to turn off legend
+  # geom_text(data=tasks.long, aes(label=Project, colour=Project)) + 
+  
+  geom_dl(aes(label = Project), method = list(dl.trans(x = x - 0.1), "first.points", cex = 0.8)) +# added by PM, label charts
+
+  coord_flip() +
+  scale_y_date(date_breaks=date.breaks, labels=date_format("%b ‘%y")) + 
+  geom_rangeframe() +
+  theme_tufte(ticks = FALSE) +
+  # theme_gantt() + 
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+  
+  return(p)
+}
 
 
 
 ```
 
-```{r r-sections, eval=TRUE, echo=FALSE,results="asis"}
+```{r r-sections, eval=TRUE, echo=FALSE,results="asis", fig.fullwidth=TRUE, fig.width=10, fig.height=3, cache=FALSE, message=FALSE}
 section.sql <- "dbo.usp_PM_Section_GetSections"
 section.query <- dbSendQuery(con, section.sql)
 section.list <- dbFetch(section.query)
@@ -122,7 +188,8 @@ for (row in 1:nrow(section.df)){
   section.id <- section.df[row,"sectionid"]
   section.name <- section.df[row,"section"]
   f.df <- getdetailfromCV(f.edit=editid, f.sectionid=section.id)
-  if (!section.name %in% section.ignore){
+
+  if (nrow(f.df)> 0 & !section.name %in% section.ignore){
     tex.formatfromDB(section.name, 1, "")
     for (row in 1:nrow(f.df)){
   
@@ -149,13 +216,28 @@ for (row in 1:nrow(section.df)){
     if(section.name %in% section.astable){
       tex.formatfromDB(section.name, 1, "")
       o.df <- getdetailfromCV(f.edit=editid, f.sectionid=section.id, f.showastable=1)
-      o.df <- select(o.df, opportunityname, company, state, startpoint, endingpoint)
-      o.df <- rename(o.df, Position=opportunityname, Institution=company, Place=state, From=startpoint, To=endingpoint)
-      print(knitr::kable(o.df, caption = paste(section.name,' details')))#select(iris, "Sepal.Length", "Sepal.Width")
-      cat("\n")
+      if (nrow(o.df)>0){
+        o.df.viz <- getOpportunityDfForPlot(o.df)
+        o.date.breaks <- getDateBreaks(o.df)
+        o.df.kable <- select(o.df, opportunityname, company, state, startpoint, endingpoint)
+        o.df.kable <- rename(o.df.kable, Position=opportunityname, Institution=company, Place=state, From=startpoint, To=endingpoint)
+        print(knitr::kable(o.df.kable, caption = paste(section.name,' details')))
+        cat("\n")
+        # print(getOpportunityPlot(o.df.viz, date.breaks=o.date.breaks))
+        cat("\n")
+      }
     }
   }
 }
+
+```
+
+## Opportunities fully visualised
+
+```{r r-opportunity-vis-produce, echo=FALSE, eval=TRUE, fig.fullwidth=TRUE, fig.width=10, fig.height=3, cache=FALSE, message=FALSE}
+o.df.full <- getdetailfromCV(f.edit=editid, f.sectionid=0, f.showastable=1)#NB section id zeroed
+# getOpportunityPlot(getOpportunityDfForPlot(o.df.full))
+
 ```
 
 ## Community profile

@@ -1,0 +1,54 @@
+---
+title: "PyTest"
+author: "Pete Moore"
+date: "11/09/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(reticulate)
+use_condaenv(condaenv="PyR", required =TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{python py-setup, include=FALSE}
+# Internal variables setup (NB set up variables in python so can be passed to R)
+editid = 0 #an id for this edit of the cv; set to zero to build new edition of CV
+cvtypeid = 1 #1	Data Scientist; 2	IT Director; 3	SQL Server Expert; 4	Non-executive Director
+# we want to utilise the included to build a model for thisCV 
+PATH_FILE="/Users/petermoore/Documents/GitHub/Pete Moore - Data Scientist - CV/Python"
+import os
+os.chdir(PATH_FILE)
+import sys
+sys.path.append(PATH_FILE) #add local directory to path
+
+
+pyvar = 12
+
+```
+
+```{r}
+rvar=py$pyvar
+print(rvar)
+```
