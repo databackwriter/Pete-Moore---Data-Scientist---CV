@@ -8,7 +8,15 @@ header-includes:
 - \fancyhead[CO,CE]{07810698243|pete@lookatyourdata.ai}
 - \fancyfoot[CO,CE]{`r Sys.Date()`}
 - \fancyfoot[LE,RO]{\thepage}
-output: pdf_document
+# output: pdf_document
+output:
+  tufte::tufte_html: default
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
 ---
 
 ```{r r-keep-tidy, include = FALSE}
